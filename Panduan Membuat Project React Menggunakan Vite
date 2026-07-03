@@ -43,4 +43,18 @@ Saat proses pembuatan project berlangsung, pilih opsi berikut:
 * **Linter**: Pilih **ESLint**.
 * **Install with npm and start now?**: Pilih **Yes** agar seluruh dependensi langsung diinstal dan development server dijalankan secara otomatis.
 
-Setelah proses selesai, Vite akan menampilkan alamat lokal (umumnya `http://localhost:5173`). Buka alamat tersebut melalui browser untuk memastikan project React berhasil dibuat dan berjalan dengan baik.
+## Menjalankan Project
+
+Setelah proses instalasi selesai, Vite akan menjalankan development server secara otomatis dan menampilkan alamat lokal seperti berikut:
+
+```text
+Local: http://localhost:5173/
+```
+
+Buka browser, kemudian akses alamat berikut untuk melihat aplikasi React yang telah dibuat:
+
+```text
+http://localhost:5173/
+```
+
+Apabila halaman React berhasil ditampilkan, berarti project telah berhasil dibuat dan siap untuk dikembangkan.
