@@ -2,21 +2,41 @@
 
 ```bash
 src/
-├── assets/ (Folder berisi aset seperti font atau gambar)
+├── assets/
 │   ├── images/
 │   ├── fonts/
-├── components/ (Folder berisi komponen)
-├── layouts/ (Folder berisi layout utama)
-├── pages/ (Folder berisi halaman)
-│   ├── Home/
-│   ├── Surah/
-│   ├── Ayah/
-│   ├── Editor/
-├── router/ (Folder router berisi konfigurasi navigasi aplikasi menggunakan React Router.)
-├── services/ (Folder services berisi kode yang berhubungan dengan sumber data eksternal, seperti API atau database.)
-├── hooks/ (Folder hooks berisi Custom Hook, yaitu fungsi yang memanfaatkan Hook React agar logika dapat digunakan kembali.)
-├── utils/ (Folder utils berisi fungsi-fungsi bantuan (utility) yang tidak bergantung pada React.)
-├── styles/ Folderkhusus untuk file styling.
+├── components/
+│   ├── Textarea.jsx
+├── layouts/
+│   ├── Brand.jsx
+│   ├── Footer.jsx
+│   ├── Header.jsx
+│   ├── Nav.jsx
+│   ├── Sidebar.jsx
+│   ├── index.jsx
+├── pages/
+│   ├── Home.jsx
+│   ├── Surah.jsx
+│   ├── Ayah.jsx
+│   ├── Editor.jsx
+├── router/
+├── services/
+│   ├── api.js
+│   ├── ayah.service.js
+├── hooks/
+│   ├── Tajwid.jsx
+├── utils/
+├── styles/
+│   ├── index.css
+│   ├── header.css
+│   ├── footer.css
+│   ├── nav.css
+│   ├── sidebar.css
+│   ├── surah.css
+│   ├── ayah.css
+│   ├── home.css
+│   ├── editor.css
+│   ├── variabel.css
 ├── App.jsx
 └── main.jsx
 ```
