@@ -15,7 +15,7 @@ npm install @capacitor/core
 ```
 
 ```bash
-npm list @capacitor/clipboard
+npm install @capacitor/clipboard
 ```
 
 # Menentukan Struktur Folder
