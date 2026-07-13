@@ -6,6 +6,14 @@ npm install autosize
 npm install react-router-dom
 ```
 
+```bash
+npm install axios
+```
+
+``bash
+npm install axios
+```
+
 # Menentukan Struktur Folder
 
 ```bash
