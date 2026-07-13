@@ -14,7 +14,7 @@ npm install axios
 npm install @capacitor/core
 ```
 
-``bash
+```bash
 npm list @capacitor/clipboard
 ```
 
