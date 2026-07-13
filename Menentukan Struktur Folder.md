@@ -10,8 +10,16 @@ npm install react-router-dom
 npm install axios
 ```
 
+```bash
+npm install @capacitor/core
+```
+
+```bash
+npm list @capacitor/core
+```
+
 ``bash
-npm install axios
+npm list @capacitor/clipboard
 ```
 
 # Menentukan Struktur Folder
