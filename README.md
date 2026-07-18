@@ -1763,17 +1763,32 @@ export default api;
 
 - Update `src/services/surah.services.js`
 ```js
-import axios from "axios";
+import api from "./api";
 
-const api = axios.create({
-    baseURL: "https://equran.id/api/v2",
-    timeout: 10000,
-    headers: {
-        "Content-Type": "application/json",
+export const SurahService = {
+
+    /**
+     * Mengambil seluruh daftar surah.
+     */
+    async getAll() {
+        const response = await api.get("/surat");
+        return response.data.data;
     },
-});
 
-export default api;
+    /**
+     * Mengambil detail satu surah.
+     */
+    async getByNumber(number) {
+        const response = await api.get(`/surat/${number}`);
+        return response.data.data;
+    },
+
+    async getById(nomor) {
+        const { data } = await api.get(`/surat/${nomor}`);
+        return data.data;
+    }
+
+};
 ```
 
 - Update `src/components/Input.jsx`
