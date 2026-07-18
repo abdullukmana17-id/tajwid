@@ -3823,7 +3823,7 @@ export default function useAndroidBackButton() {
 ```
 
 - Update `src/components/Textarea.jsx`
-- ```jsx
+```jsx
   import { useEffect, useRef } from "react";
 import autosize from "autosize";
 
