@@ -3600,289 +3600,105 @@ export default function Editor() {
 
 - Update `src/styles/editor.scss`
 ```scss
-import { useRef, useState } from "react";
-import Textarea from "../components/Textarea";
-import Tajwid from "../hooks/Tajwid";
+.editor {
+    font-family: $font-tertiary;
 
-import { Capacitor } from "@capacitor/core";
-import { Clipboard } from "@capacitor/clipboard";
-
-const readClipboard = async () => {
-    if (Capacitor.isNativePlatform()) {
-        const { value } = await Clipboard.read();
-        return value;
+    .container {
+        max-width: 46rem;
     }
 
-    return await navigator.clipboard.readText();
-};
-
-export default function Editor() {
-    const containerRef = useRef(null);
-
-    const [leftWidth, setLeftWidth] = useState(50);
-    const [text, setText] = useState("");
-    const [mode, setMode] = useState("input");
-
-    function onlyArabic(text) {
-        return text.replace(
-            /[^\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF\s]/g,
-            ""
-        );
+    h1,
+    h3,
+    .btn {
+        font-family: $font-secondary;
     }
 
-    const handleMouseDown = () => {
-        const handleMouseMove = (e) => {
-            if (!containerRef.current) return;
-
-            const rect = containerRef.current.getBoundingClientRect();
-
-            let newWidth =
-                ((e.clientX - rect.left) / rect.width) * 100;
-
-            // batas minimum dan maksimum panel kiri
-            newWidth = Math.max(20, Math.min(80, newWidth));
-
-            setLeftWidth(newWidth);
-        };
-
-        const handleMouseUp = () => {
-            document.removeEventListener(
-                "mousemove",
-                handleMouseMove
-            );
-
-            document.removeEventListener(
-                "mouseup",
-                handleMouseUp
-            );
-        };
-
-        document.addEventListener(
-            "mousemove",
-            handleMouseMove
-        );
-
-        document.addEventListener(
-            "mouseup",
-            handleMouseUp
-        );
-    };
-
-    function handleChange(e) {
-        const arabicText = onlyArabic(e.target.value);
-
-        setText(arabicText);
+    &:nth-child(1) {
+        background-image: linear-gradient(90deg, rgb(240, 240, 240) 1px, rgba(0, 0, 0, 0) 1px), linear-gradient(rgb(240, 240, 240) 1px, rgba(0, 0, 0, 0) 1px);
+        background-size: 4rem 4rem;
     }
 
-    const handlePaste = async () => {
-        try {
-            const clipboardText = await readClipboard();
+    .editor-split {
+        display: flex;
+        width: 100%;
+        overflow: hidden;
+    }
 
-            const arabicText = onlyArabic(clipboardText);
 
-            if (!arabicText.trim()) {
-                alert("Clipboard tidak berisi teks Arab");
-                return;
-            }
+    .editor-panel {
+        height: 100%;
+        overflow: hidden;
+    }
 
-            setText((prev) =>
-                prev
-                    ? prev + "\n" + arabicText
-                    : arabicText
-            );
 
-        } catch (err) {
-            console.error("Clipboard Error:", err);
+    .editor-panel textarea {
+        width: 100%;
+        height: 100%;
+        resize: none;
+        padding: 1.5rem;
+        outline: none;
+    }
 
-            alert(
-                err?.message ||
-                JSON.stringify(err) ||
-                "Gagal membaca clipboard"
-            );
-        }
-    };
 
-    const handlePasteEvent = (e) => {
-        e.preventDefault();
+    .editor-divider {
+        width: 1px;
+        flex-shrink: 0;
+        background-color: var(--bs-border-color);
+        cursor: col-resize;
+        position: relative;
+    }
 
-        const pastedText = e.clipboardData.getData("text");
 
-        const arabicText = onlyArabic(pastedText);
+    .editor-divider:hover {
+        background-color: #6c757d;
+    }
 
-        if (!arabicText.trim()) {
-            return;
+
+    /* area drag lebih besar agar mudah digunakan */
+    .editor-divider::before {
+        content: "";
+        position: absolute;
+        inset: 0 -5px;
+        cursor: col-resize;
+    }
+
+    .form-control::placeholder {
+        font-family: $font-secondary;
+        font-size: 1rem;
+        text-align: left;
+        line-height: normal;
+    }
+
+    .font-secondary {
+        font-family: $font-secondary;
+    }
+
+    .btn-stylish {
+        display: inline-block;
+        position: relative;
+        background-color: transparent !important;
+        text-decoration: none;
+        overflow: hidden;
+        z-index: 1;
+        border: 1px solid var(--bs-dark) !important;
+
+        &::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: $primary-color;
+            transform: translateX(-100%);
+            transition: all .3s;
+            z-index: -1;
         }
 
-        setText((prev) =>
-            prev
-                ? prev + "\n" + arabicText
-                : arabicText
-        );
-    };
-
-    const handleClear = () => {
-        setText("");
-    };
-
-    const handleExampleText = () => {
-        setText(
-            "ذَٰلِكَ الْكِتَابُ لَا رَيْبَ فِيهِ هُدًى لِّلْمُتَّقِينَ"
-        );
-    };
-
-    return (
-        <>
-            <section className="editor py-5 min-vh-100">
-                <div className="container">
-
-                    <div className="row justify-content-center">
-                        <div className="col-11 col-sm-10 text-center">
-
-                            <h1 className="display-2" data-aos="fade-up" data-aos-anchor-placement="bottom-bottom">
-                                Deteksi{" "}
-                                <span className="bg-dark text-white text-nowrap px-3 rounded-3">
-                                    Tajwid
-                                </span>
-                            </h1>
-
-                            <p className="fs-4" data-aos="fade-up" data-aos-anchor-placement="bottom-bottom">
-                                Masukkan teks Arab Al-Qur'an untuk mendeteksi hukum tajwid dengan <em>highlight</em> otomatis pada setiap bacaan.
-                            </p>
-
-                        </div>
-                    </div>
-
-
-                    <div className="row justify-content-center g-1">
-                        <div className="col-11 col-md-12 px-4">
-
-                            <div className="card border border-secondary-subtle rounded-0 shadow-sm mx-2" data-aos="fade-up" data-aos-anchor-placement="bottom-bottom">
-
-                                <div className="corner top left"></div>
-                                <div className="corner top right"></div>
-                                <div className="corner bottom left"></div>
-                                <div className="corner bottom right"></div>
-
-
-                                <div className="card-body p-0">
-
-                                    <div
-                                        className="editor-split"
-                                        ref={containerRef}
-                                    >
-
-                                        <div
-                                            className={`editor-panel d-md-block flex-grow-1 ${mode === "result" ? "d-none" : ""}`}
-                                            style={{
-                                                width: `${leftWidth}%`
-                                            }}
-                                        >
-                                            <Textarea
-                                                id="quran-editor"
-                                                label="Masukkan Ayat"
-                                                placeholder="Masukkan teks Arab"
-                                                value={text}
-                                                className="font-lpmq fs-4"
-                                                onChange={handleChange}
-                                                onPaste={handlePasteEvent}
-                                            />
-                                        </div>
-
-
-                                        <div
-                                            className="editor-divider"
-                                            onMouseDown={handleMouseDown}
-                                        />
-
-
-                                        <div
-                                            className={`editor-panel p-3 d-md-block flex-grow-1 ${mode === "input" ? "d-none" : ""}`}
-                                            style={{
-                                                width: `${100 - leftWidth}%`
-                                            }}
-                                        >
-                                            {text ? (
-
-                                                <p
-                                                    dir="rtl"
-                                                    className="fs-4 text-end font-lpmq"
-                                                >
-                                                    <Tajwid text={text} />
-                                                </p>
-                                            ) : (
-                                                <p className="mb-0 font-secondary">
-                                                    Belum ada teks arab yang dimasukkan
-                                                </p>
-                                            )}
-
-                                        </div>
-
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                        <div className="col-11 text-center" data-aos="fade-up" data-aos-anchor-placement="bottom-bottom">
-                            <small className="text-body-secondary">
-                                Masukkan teks Arab Al-Qur'an dengan harakat untuk mendapatkan hasil deteksi tajwid yang lebih akurat.
-                            </small>
-                        </div>
-
-                        <div data-aos="fade-up" data-aos-anchor-placement="bottom-bottom" className="col-9 col-sm-7 col-md-6 col-lg-4 col-xl-3 mt-3 d-flex align-items-center justify-content-center gap-2">
-                            <button className="btn btn-primary btn-stylish rounded-0 w-100" onClick={handlePaste}>
-                                <i className="bi bi-clipboard me-2"></i>
-                                Tempel Teks
-                            </button>
-                        </div>
-                        <div data-aos="fade-up" data-aos-anchor-placement="bottom-bottom" className="col-9 col-sm-7 col-md-6 col-lg-4 col-xl-3 mt-3 d-flex align-items-center justify-content-center gap-2">
-                            <button className="btn btn-primary btn-stylish rounded-0 w-100" onClick={handleClear} disabled={!text}>
-                                <i className="bi bi-trash3 me-2"></i>
-                                Hapus
-                            </button>
-                        </div>
-                        <div data-aos="fade-up" data-aos-anchor-placement="bottom-bottom" className="col-9 col-sm-7 col-md-6 col-lg-4 col-xl-3 mt-3 d-flex align-items-center justify-content-center gap-2">
-                            <button className="btn btn-primary btn-stylish rounded-0 w-100" onClick={handleExampleText}>
-                                <i className="bi bi-file-earmark-text me-2"></i>
-                                Contoh Teks
-                            </button>
-                        </div>
-                    </div>
-
-                </div>
-            </section>
-            <section className="py-2 editor position-sticky bottom-0 d-lg-none border-top bg-body">
-                <div className="container">
-                    <div className="row">
-                        <div className="col-12 d-flex align-items-center justify-content-center gap-2">
-                            <button
-                                className={`btn rounded-0 ${mode === "input"
-                                    ? "btn-primary"
-                                    : "btn-outline-dark"
-                                    }`}
-                                onClick={() => setMode("input")}
-                            >
-                                Input
-                            </button>
-
-
-                            <button
-                                className={`btn rounded-0 ${mode === "result"
-                                    ? "btn-primary"
-                                    : "btn-outline-dark"
-                                    }`}
-                                onClick={() => setMode("result")}
-                            >
-                                Hasil Deteksi
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </>
-    );
+        &:hover::before {
+            transform: translateX(0);
+        }
+    }
 }
 ```
 
