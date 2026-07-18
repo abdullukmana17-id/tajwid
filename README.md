@@ -119,8 +119,7 @@ src/
 ├── router/
 ├── services/
 │   ├── api.js
-│   ├── surah.service.js
-│   ├── ayah.service.js
+│   ├── surah.services.js
 ├── hooks/
 │   ├── useAndroidBackButton.jsx
 │   ├── Tajwid.jsx
