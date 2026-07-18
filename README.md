@@ -2653,6 +2653,21 @@ function App() {
 export default App;
 ```
 
+- Update `src/styles/index.scss`
+```scss
+@import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css");
+
+@import "./variables.scss";
+@import "./layout.scss";
+@import "./sidebar.scss";
+@import "./brand.scss";
+@import "./card.scss";
+@import "./home.scss";
+@import "./utils.scss";
+@import "./surah.scss";
+@import "./ayah.scss";
+```
+
 ## Membuat halaman deteksi tajwid
 - Update `src/pages/Editor.jsx`
 ```jsx
