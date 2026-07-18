@@ -2668,6 +2668,647 @@ export default App;
 @import "./ayah.scss";
 ```
 
+- Update `src/hooks/Tajwid.jsx`
+```jsx
+import { useEffect, useRef } from "react";
+const { Tooltip } = window.bootstrap;
+
+const arabicChars = {
+    alif: "\u0627",
+    ba: "\u0628",
+    ta: "\u062A",
+    tsa: "\u062B",
+    jim: "\u062C",
+    ha: "\u062D",
+    kho: "\u062E",
+    dal: "\u062F",
+    dzal: "\u0630",
+    ra: "\u0631",
+    zai: "\u0632",
+    sin: "\u0633",
+    syin: "\u0634",
+    shod: "\u0635",
+    dhod: "\u0636",
+    tho: "\u0637",
+    zho: "\u0638",
+    ain: "\u0639",
+    ghain: "\u063A",
+    fa: "\u0641",
+    qof: "\u0642",
+    kaf: "\u0643",
+    lam: "\u0644",
+    mim: "\u0645",
+    nun: "\u0646",
+    waw: "\u0648",
+    ha2: "\u0647",
+    hamzah: "\u0621",
+    ya: "\u064A",
+
+    maddah: "\u0653",
+    small_madd: "\u06E4",
+
+    fathah: "\u064E",
+    kasrah: "\u0650",
+    dhammah: "\u064F",
+    sukun: "\u0652",
+    tasydid: "\u0651",
+    tanwin_a: "\u064B",
+    tanwin_i: "\u064D",
+    tanwin_u: "\u064C",
+    fathah_alif: "\u0649",
+    fathah_superscript: "\u0670",
+    kasrah_superscript: "\u0656",
+    dhammah_inverted: "\u0657",
+
+    lam_alif: "\u0644\u0627",
+    ta_marbuta: "\u0629",
+    alif_mad: "\u0622",
+    alif_hamzah_atas: "\u0623",
+    alif_hamzah_bawah: "\u0625",
+    hamzah_below: "\u0655",
+    waw_hamzah: "\u0624",
+    ya_hamzah: "\u0626",
+
+    space: "\u0020"
+};
+
+const arabicGroups = {
+    letters: [
+        arabicChars.alif,
+        arabicChars.ba,
+        arabicChars.ta,
+        arabicChars.tsa,
+        arabicChars.jim,
+        arabicChars.ha,
+        arabicChars.kho,
+        arabicChars.dal,
+        arabicChars.dzal,
+        arabicChars.ra,
+        arabicChars.zai,
+        arabicChars.sin,
+        arabicChars.syin,
+        arabicChars.shod,
+        arabicChars.dhod,
+        arabicChars.tho,
+        arabicChars.zho,
+        arabicChars.ain,
+        arabicChars.ghain,
+        arabicChars.fa,
+        arabicChars.qof,
+        arabicChars.kaf,
+        arabicChars.lam,
+        arabicChars.mim,
+        arabicChars.nun,
+        arabicChars.waw,
+        arabicChars.ha2,
+        arabicChars.hamzah,
+        arabicChars.ya,
+        arabicChars.ta_marbuta
+    ].join(""),
+
+    tanwin: [
+        arabicChars.tanwin_a,
+        arabicChars.tanwin_i,
+        arabicChars.tanwin_u
+    ].join(""),
+
+    harakat: [
+        arabicChars.fathah,
+        arabicChars.kasrah,
+        arabicChars.dhammah,
+        arabicChars.sukun,
+        arabicChars.tasydid
+    ].join(""),
+
+    diacritics: [
+        arabicChars.fathah,
+        arabicChars.kasrah,
+        arabicChars.dhammah,
+        arabicChars.sukun,
+        arabicChars.tasydid,
+        arabicChars.tanwin_a,
+        arabicChars.tanwin_i,
+        arabicChars.tanwin_u,
+        arabicChars.maddah,
+        arabicChars.small_madd,
+        arabicChars.fathah_superscript,
+        arabicChars.kasrah_superscript,
+        arabicChars.dhammah_inverted,
+        arabicChars.hamzah_below
+    ].join(""),
+
+    idzhar: [
+        arabicChars.hamzah,
+        arabicChars.ha2,
+        arabicChars.ain,
+        arabicChars.ha,
+        arabicChars.ghain,
+        arabicChars.kho
+    ].join(""),
+
+    idgham: {
+        maal_gunnah: [
+            arabicChars.ya,
+            arabicChars.nun,
+            arabicChars.mim,
+            arabicChars.waw
+        ].join(""),
+
+        bila_gunnah: [
+            arabicChars.lam,
+            arabicChars.ra
+        ].join(""),
+
+        all: [
+            arabicChars.ya,
+            arabicChars.nun,
+            arabicChars.mim,
+            arabicChars.waw,
+            arabicChars.lam,
+            arabicChars.ra
+        ].join("")
+    },
+
+    iqlab: arabicChars.ba,
+
+    ikhfa: [
+        arabicChars.ta,
+        arabicChars.tsa,
+        arabicChars.jim,
+        arabicChars.dal,
+        arabicChars.dzal,
+        arabicChars.zai,
+        arabicChars.sin,
+        arabicChars.syin,
+        arabicChars.shod,
+        arabicChars.dhod,
+        arabicChars.tho,
+        arabicChars.zho,
+        arabicChars.fa,
+        arabicChars.qof,
+        arabicChars.kaf
+    ].join(""),
+
+    marks: "\u0610-\u061A\u064B-\u0652\u0653-\u065F\u0670\u06D6-\u06ED",
+    nonQuranicLetters: "\u06D5"
+};
+
+const tajwids = [
+    {
+        name: "Izhar Halqi",
+        priority: 2,
+        color: "rgb(179, 74, 0)",
+        backgroundColor: "rgba(179, 74, 0, 0.1)",
+        pattern: [
+            [
+                /** Nun + sukun */
+                `${arabicChars.nun}${arabicChars.sukun}`,
+                /** optional space */
+                `(?:${arabicChars.space})?`,
+                /** lookahead idzhar */
+                `(?=[${arabicGroups.idzhar}])`
+            ].join(""),
+
+            [
+                /** Letter + tanwin */
+                `[${arabicGroups.letters}][${arabicGroups.tanwin}]`,
+                /** Opional spasi */
+                `(?:${arabicChars.space})?`,
+                /** setelahnya huruf idzhar */
+                `(?=[${arabicGroups.idzhar}])`
+            ].join("")
+        ],
+        flags: "g",
+        className: "idzhar"
+    },
+    {
+        name: "Idgham Bigunnah",
+        priority: 2,
+        color: "rgb(0, 128, 0)",
+        backgroundColor: "rgba(0, 128, 0, 0.1)",
+        pattern: [
+            [
+                /** Nun sukun */
+                `${arabicChars.nun}${arabicChars.sukun}`,
+                /** optional space */
+                `(?:${arabicChars.space})?`,
+                /** Setelahnya Huruf idgham maal gunnah */
+                `(?=[${arabicGroups.idgham.maal_gunnah}])`
+            ].join(""),
+            [
+                /** Huruf dengan tanwin */
+                `[${arabicGroups.letters}][${arabicGroups.tanwin}]`,
+                /** Opsional alif */
+                `${arabicChars.alif}?`,
+                /** Opsional alif maksuroh */
+                `(?:${arabicChars.fathah_alif})?`,
+                /** optional space */
+                `(?:${arabicChars.space})?`,
+                /** Setelahnya huruf idghom maal gunnah */
+                `(?=`,
+                `[${arabicGroups.idgham.maal_gunnah}]`,
+                `)`
+            ].join("")
+        ],
+        flags: "g",
+        className: "idgham"
+    },
+    {
+        name: "Idgham Bilagunnah",
+        priority: 2,
+        color: "rgb(0, 128, 0)",
+        backgroundColor: "rgba(0, 128, 0, 0.1)",
+        pattern: [
+            [
+                /** Nun sukun */
+                `${arabicChars.nun}${arabicChars.sukun}`,
+                /** optional space */
+                `(?:${arabicChars.space})?`,
+                /** Setelahnya huruf idgham bila gunnah */
+                `(?=`,
+                `[${arabicGroups.idgham.bila_gunnah}]`,
+                `)`
+            ].join(""),
+            [
+                /** Huruf bertanwin */
+                `[${arabicGroups.letters}][${arabicGroups.tanwin}]`,
+                /** Opsional alif */
+                `${arabicChars.alif}?`,
+                /** Opsional alif maksuroh dan spasi */
+                `${arabicChars.fathah_alif}?`,
+                `${arabicChars.space}?`,
+                /** Setelahnya huruf idghom bila gunnah */
+                `(?=`,
+                `[${arabicGroups.idgham.bila_gunnah}]`,
+                `)`
+            ].join("")
+        ],
+        flags: "g",
+        className: "idgham"
+    },
+    {
+        name: "Iqlab",
+        priority: 2,
+        color: "rgb(0, 128, 128)",
+        backgroundColor: "rgba(0, 128, 128, 0.1)",
+        pattern: [
+            [
+                /** Nun Sukun */
+                `${arabicChars.nun}${arabicChars.sukun}`,
+                /** Opsional spasi */
+                `(?:${arabicChars.space})?`,
+                /** Setelahnya huruf iqlab */
+                `(?=`,
+                `[${arabicGroups.iqlab}]`,
+                `)`
+            ].join(""),
+            [
+                /** Huruf bertanwin */
+                `[${arabicGroups.letters}][${arabicGroups.tanwin}]`,
+                /** Opsional spasi dn opsional mark */
+                `(?:[${arabicGroups.marks}${arabicChars.space}${arabicGroups.nonQuranicLetters}]*)?`,
+                /** Setelahnya huruf iqlab */
+                `(?=`,
+                `[${arabicGroups.iqlab}]`,
+                `)`
+            ].join("")
+        ],
+        flags: "g",
+        className: "iqlab"
+    },
+    {
+        name: "Ikhfa",
+        priority: 3,
+        color: "rgb(189, 15, 30)",
+        backgroundColor: "rgba(189, 15, 30, 0.1)",
+        pattern: [
+            [
+                /** Nun Sukun */
+                `${arabicChars.nun}`,
+                `${arabicChars.sukun}?`,
+                /** Opsional spasi */
+                `(?:${arabicChars.space})?`,
+                /** Setelahnya huruf ikhfa */
+                `(?=`,
+                `[${arabicGroups.ikhfa}]`,
+                `)`
+            ].join(""),
+            [
+                /** Huruf bertanwin */
+                `[${arabicGroups.letters}][${arabicGroups.tanwin}]`,
+                `${arabicChars.alif}?`,
+                /** Opsional spasi */
+                `(?:${arabicChars.space})?`,
+                /** Setelahnya huruf ikhfa */
+                `(?=`,
+                `[${arabicGroups.ikhfa}]`,
+                `)`
+            ].join("")
+        ],
+        flags: "g",
+        className: "ikhfa"
+    },
+    {
+        name: "Mad Tabi'i",
+        priority: 4,
+        color: "rgb(129, 0, 194)",
+        backgroundColor: "rgba(129, 0, 194, 0.05)",
+        pattern: [
+            /** Fathah */
+            [
+                /** Sebelumnya adalah fathah */
+                `(?<=`,
+                `${arabicChars.fathah}`,
+                `)`,
+                /** Huruf alif */
+                `${arabicChars.alif}`,
+                /** Alif tidak idak memiliki harakat */
+                `(?!`,
+                `${arabicChars.fathah}|`,
+                `${arabicChars.dhammah}|`,
+                `${arabicChars.kasrah}|`,
+                /** Setelah nya bukan lam */
+                `${arabicChars.lam}|`,
+                /** Setelahnya bukan mad */
+                `${arabicChars.small_madd}|`,
+                `${arabicChars.maddah}|`,
+                /** Setelahnya bukan spasi dan alif lam */
+                `${arabicChars.space}${arabicChars.alif}${arabicChars.lam}|`,
+                /** Setelahnya bukan huruf bertasydid */
+                `[${arabicGroups.letters}]${arabicChars.tasydid}`,
+                `)`,
+                /** Bukan akhir ayah(Harus memiliki setidaknya 4 karakter atau lebih banyak) */
+                `(?=.{5,})`,
+            ].join(""),
+            /** Dhommah */
+            [
+                /** Sebelumnya dhommah */
+                `(?<=`,
+                `${arabicChars.dhammah}`,
+                `)`,
+                `(?<!${arabicChars.alif_hamzah_atas})`,
+                /** Kemudian wawu sukun */
+                `${arabicChars.waw}`,
+                `${arabicChars.sukun}?`,
+                /** Setellahnya bukan mad */
+                `(?!`,
+                `${arabicChars.small_madd}|`,
+                `${arabicChars.maddah}|`,
+                `\\u06DF`,
+                `)`,
+                /** Bukan akhir ayah(Harus memiliki setidaknya 4 karakter atau lebih banyak) */
+                `(?=.{5,})`,
+            ].join(""),
+            /** Kasrah */
+            [
+                /** Sebelumnya harus kasrah */
+                `(?<=`,
+                `${arabicChars.kasrah}`,
+                `)`,
+                /** Ya sukun */
+                `${arabicChars.ya}`,
+                `${arabicChars.sukun}?`,
+                /** Setelahnya bukan mad */
+                `(?!`,
+                `${arabicChars.small_madd}|`,
+                `${arabicChars.maddah}`,
+                `)`,
+                /** Bukan akhir ayah(Harus memiliki setidaknya 4 karakter atau lebih banyak) */
+                `(?=.{5,})`,
+            ].join(""),
+            [
+                /** Huruf dengan fathah superscript */
+                `[${arabicGroups.letters}]`,
+                /** Opsioal tasydid */
+                `${arabicChars.tasydid}?`,
+                `${arabicChars.fathah}?`,
+                `${arabicChars.fathah_superscript}`,
+                /** Setalhnya bukan mad */
+                `(?![${arabicChars.small_madd}${arabicChars.maddah}])`
+            ].join(""),
+        ],
+        flags: "g",
+        className: "mad-tabii"
+    },
+];
+
+function resolveConflicts(matches) {
+    if (matches.length === 0) return [];
+
+    // Urutkan: start ASC, lalu priority ASC (lebih kecil = lebih tinggi)
+    const sorted = [...matches].sort((a, b) => {
+        if (a.start !== b.start) return a.start - b.start;
+        return a.priority - b.priority;
+    });
+
+    const accepted = [];
+
+    for (const candidate of sorted) {
+        if (accepted.length === 0) {
+            accepted.push(candidate);
+            continue;
+        }
+
+        const last = accepted[accepted.length - 1];
+        const overlaps = candidate.start < last.end;
+
+        if (!overlaps) {
+            // Tidak ada tumpang-tindih → langsung terima
+            accepted.push(candidate);
+        } else if (candidate.start === last.start) {
+            // Dimulai di posisi sama → yang sudah di-accept punya priority
+            // lebih tinggi (karena sort), jadi abaikan kandidat ini
+        } else {
+            // Overlap sebagian (candidate.start > last.start)
+            // Ganti hanya jika kandidat punya priority LEBIH TINGGI (angka lebih kecil)
+            if (candidate.priority < last.priority) {
+                accepted.pop();
+                accepted.push(candidate);
+            }
+            // Jika tidak lebih tinggi, abaikan kandidat
+        }
+    }
+
+    return accepted;
+}
+
+export default function Tajwid({ text }) {
+    const rawMatches = [];
+
+    tajwids.forEach(({ pattern, flags, className, color, name, backgroundColor, priority }) => {
+        // Normalisasi: jadikan array jika masih string tunggal
+        const patterns = Array.isArray(pattern) ? pattern : [pattern];
+
+        patterns.forEach((p) => {
+            const regex = new RegExp(p, flags);
+
+            text.replace(regex, (match, ...args) => {
+                const offset = args[args.length - 2];
+
+                rawMatches.push({
+                    start: offset,
+                    end: offset + match.length,
+                    match,
+                    className,
+                    color,
+                    name,
+                    backgroundColor,
+                    priority
+                });
+            });
+        });
+    });
+
+    // Selesaikan konflik dengan sistem prioritas
+    const matches = resolveConflicts(rawMatches);
+
+    // Bangun output React
+    const parts = [];
+    let lastIndex = 0;
+
+    matches.forEach((m, i) => {
+        if (m.start > lastIndex) {
+            parts.push(text.slice(lastIndex, m.start));
+        }
+
+        parts.push(
+            <TajwidSpan
+                key={`${m.start}-${i}`}
+                {...m}
+            />
+        );
+
+        lastIndex = m.end;
+    });
+
+    // Sisa teks setelah match terakhir
+    if (lastIndex < text.length) {
+        parts.push(text.slice(lastIndex));
+    }
+
+    return <>{parts}</>;
+}
+
+function TajwidSpan({ match, name, className, color, backgroundColor }) {
+    const tooltipRef = useRef(null);
+
+    useEffect(() => {
+        if (!tooltipRef.current) return;
+
+        const tooltip = new Tooltip(tooltipRef.current, {
+            boundary: document.body
+        });
+
+        return () => tooltip.dispose(); // ✅ cleanup
+    }, []);
+
+    return (
+        <span
+            ref={tooltipRef}
+            style={{
+                backgroundColor: backgroundColor || undefined,
+                color: color || undefined,
+                borderColor: backgroundColor || undefined,
+                cursor: "pointer"
+            }}
+            data-bs-toggle="tooltip"
+            data-bs-custom-class="tajwid"
+            data-bs-html="true"
+            data-bs-placement="top"
+            data-bs-title={`<small>${name}</small>`}
+            className={`rounded-1 border-0 ${className}`}
+        >
+            {match}
+        </span>
+    );
+}
+
+/**
+ * Menerima array penggalan teks Arab, menggabungkannya, melakukan highlight
+ * tajwid, lalu memotong kembali sesuai panjang fragment asli.
+ *
+ * @param {string[]} fragments - Array penggalan teks Arab
+ * @returns {Array<Array<string|JSX.Element>>} - Array of parts per fragment
+ */
+export function highlightAndSplit(fragments) {
+    // ── 1. Gabungkan & catat offset tiap fragment ────────────────────────────
+    const offsets = [];
+    let joined = "";
+
+    for (const frag of fragments) {
+        offsets.push({ start: joined.length, end: joined.length + frag.length });
+        joined += frag;
+    }
+
+    // ── 2. Jalankan tajwid matching pada string gabungan ─────────────────────
+    const rawMatches = [];
+
+    tajwids.forEach(({ pattern, flags, className, color, name, backgroundColor, priority }) => {
+        const patterns = Array.isArray(pattern) ? pattern : [pattern];
+
+        patterns.forEach((p) => {
+            const regex = new RegExp(p, flags);
+
+            joined.replace(regex, (match, ...args) => {
+                const offset = args[args.length - 2];
+                rawMatches.push({
+                    start: offset,
+                    end: offset + match.length,
+                    match,
+                    className,
+                    color,
+                    name,
+                    backgroundColor,
+                    priority
+                });
+            });
+        });
+    });
+
+    const matches = resolveConflicts(rawMatches);
+
+    // ── 3. Potong kembali sesuai batas tiap fragment ─────────────────────────
+    return offsets.map(({ start: fragStart, end: fragEnd }, fragIdx) => {
+        const parts = [];
+        let cursor = fragStart;
+
+        for (const m of matches) {
+            // Lewati match yang sepenuhnya sebelum fragment ini
+            if (m.end <= fragStart) continue;
+            // Hentikan jika match sepenuhnya setelah fragment ini
+            if (m.start >= fragEnd) break;
+
+            // Kliping match ke batas fragment (jika span lintas fragment)
+            const clipStart = Math.max(m.start, fragStart);
+            const clipEnd   = Math.min(m.end,   fragEnd);
+
+            // Teks biasa sebelum match
+            if (clipStart > cursor) {
+                parts.push(joined.slice(cursor, clipStart));
+            }
+
+            // Span tajwid (mungkin ter-klip jika lintas batas fragment)
+            parts.push(
+                <TajwidSpan
+                    key={`${fragIdx}-${m.start}-${clipStart}`}
+                    {...m}
+                    match={joined.slice(clipStart, clipEnd)}
+                />
+            );
+
+            cursor = clipEnd;
+        }
+
+        // Sisa teks biasa di akhir fragment
+        if (cursor < fragEnd) {
+            parts.push(joined.slice(cursor, fragEnd));
+        }
+
+        return parts;
+    });
+}
+```
+
 ## Membuat halaman deteksi tajwid
 - Update `src/pages/Editor.jsx`
 ```jsx
@@ -3331,6 +3972,38 @@ function App() {
 }
 
 export default App;
+```
+
+- Update `src/hooks/useAndroidBackButton.jsx`
+```jsx
+import { useEffect } from "react";
+import { App } from "@capacitor/app";
+import { useNavigate } from "react-router-dom";
+
+export default function useAndroidBackButton() {
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const handler = App.addListener(
+            "backButton",
+            ({ canGoBack }) => {
+
+                if (canGoBack) {
+                    navigate(-1);
+                } else {
+                    App.exitApp();
+                }
+
+            }
+        );
+
+
+        return () => {
+            handler.remove();
+        };
+
+    }, [navigate]);
+}
 ```
 
 ## Konversi ke mobile App
