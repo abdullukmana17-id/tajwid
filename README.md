@@ -1836,6 +1836,20 @@ Input.displayName = "Input";
 export default Input;
 ```
 
+- Update `src/styles/index.scss`
+```scss
+@import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css");
+
+@import "./variables.scss";
+@import "./layout.scss";
+@import "./sidebar.scss";
+@import "./brand.scss";
+@import "./card.scss";
+@import "./home.scss";
+@import "./surah.scss";
+@import "./utils.scss";
+```
+
 - Update `src/pages/Surah.jsx`
 ```jsx
 import { useState, useEffect, useMemo } from "react";
